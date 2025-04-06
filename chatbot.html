@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmBot - AI Farming Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Markdown Parser -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            margin: 20px;
+            background: #e8f5e9;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            margin: auto;
+        }
+        h2 {
+            color: green;
+        }
+        #chatbox { 
+            width: 98%; 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            height: 400px; 
+            overflow-y: auto; 
+            background: #f9f9f9;
+            border-radius: 5px;
+            text-align: left;
+        }
+        input, button { 
+            padding: 10px; 
+            margin: 5px; 
+            width: 90%; 
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button { 
+            background: green; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+        }
+        button:hover {
+            background: darkgreen;
+        }
+        .back-btn {
+            background: gray;
+        }
+        .back-btn:hover {
+            background: darkgray;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>FarmBot - AI Farming Assistant 🌾</h2>
+        <div id="chatbox"></div>
+        <input type="text" id="userInput" placeholder="Ask about farming..." />
+        <button onclick="sendMessage()">Ask</button>
+        <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            let userInput = document.getElementById("userInput").value;
+            if (!userInput) return;
+            
+            let chatbox = document.getElementById("chatbox");
+            
+            // Append user input without label
+            chatbox.innerHTML += `<p>${userInput}</p>`;
+            
+            try {
+                let response = await fetch("http://127.0.0.1:5000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userInput })
+                });
+                
+                let data = await response.json();
+                
+                // Convert Markdown to HTML and remove "FarmBot:" if present
+                let formattedResponse = marked.parse(data.response || "Error fetching response").replace(/^FarmBot:\s*/, "");
+
+                chatbox.innerHTML += `<p>${formattedResponse}</p>`;
+            } catch (error) {
+                chatbox.innerHTML += `<p style="color:red;">Error: ${error.message}</p>`;
+            }
+
+            document.getElementById("userInput").value = "";
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
